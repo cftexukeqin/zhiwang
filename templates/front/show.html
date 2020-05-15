@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Awesome-pyecharts</title>
+    <link rel="stylesheet" href="../../static/css/show.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css"
+          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <script src="https://cdn.bootcss.com/jquery/3.0.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"
+            integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+            crossorigin="anonymous"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/echarts/4.7.0/echarts.min.js"></script>
+</head>
+<body>
+<nav class="navbar navbar-default">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                    data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" style="padding:0 20px" href="/">
+                <img src="" alt="">
+            </a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav">
+                <li style="text-align: center"><a href="/">论文文献查询系统</a></li>
+            </ul>
+
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="/search/">搜索</a></li>
+                <li><a href="/list/">文献列表</a></li>
+
+                </li>
+            </ul>
+        </div><!-- /.navbar-collapse -->
+    </div><!-- /.container-fluid -->
+</nav>
+<div class="main-box">
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs" role="tablist">
+        <li role="presentation" class="active"><a href="#home" aria-controls="home" role="tab" data-toggle="tab">柱状图-作者数量</a></li>
+        <li role="presentation"><a href="#profile" aria-controls="profile" role="tab" data-toggle="tab">折线图-年份</a></li>
+        <li role="presentation"><a href="#messages" aria-controls="messages" role="tab" data-toggle="tab">柱状图-机构</a></li>
+        <li role="presentation"><a href="#settings" aria-controls="settings" role="tab" data-toggle="tab">饼图-学科占比</a></li>
+        <li role="presentation"><a href="#qikan" aria-controls="qikan" role="tab" data-toggle="tab">柱形图-期刊</a></li>
+        <li role="presentation"><a href="#catagory" aria-controls="qikan" role="tab" data-toggle="tab">饼图-资源类型</a></li>
+        <li role="presentation"><a href="#word" aria-controls="word" role="tab" data-toggle="tab">柱状图-关键词</a></li>
+        <li role="presentation"><a href="#relation" aria-controls="relation" role="tab" data-toggle="tab">关系图-作者</a></li>
+    </ul>
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+        <div role="tabpanel" class="tab-pane active" id="home">
+            <div id="abar" style="width:1000px; height:600px;"></div>
+        </div>
+        <div role="tabpanel" class="tab-pane" id="profile">
+            <div id="line" style="width:1000px; height:600px;"></div>
+        </div>
+        <div role="tabpanel" class="tab-pane" id="messages">
+            <div id="obar" style="width:1000px; height:600px;"></div>
+        </div>
+        <div role="tabpanel" class="tab-pane" id="settings">
+            <div id="pie" style="width:1000px; height:600px;"></div>
+        </div>
+        <div role="tabpanel" class="tab-pane" id="qikan">
+            <div id="qbar" style="width:1000px; height:600px;"></div>
+        </div>
+        <div role="tabpanel" class="tab-pane" id="catagory">
+            <div id="catpie" style="width:1000px; height:600px;"></div>
+        </div>
+        <div role="tabpanel" class="tab-pane" id="word">
+            <div id="wordshow" style="width:1000px; height:600px;"></div>
+        </div>
+        <div role="tabpanel" class="tab-pane" id="relation">
+            <div id="arelation" style="width:1000px; height:600px;"></div>
+        </div>
+
+    </div>
+
+</div>
+<script>
+    var chartbar = echarts.init(document.getElementById('abar'), 'white', {renderer: 'canvas'});
+    var chartline = echarts.init(document.getElementById('line'), 'white', {renderer: 'canvas'});
+    var chartobar = echarts.init(document.getElementById('obar'), 'white', {renderer: 'canvas'});
+    var chartpie = echarts.init(document.getElementById('pie'), 'white', {renderer: 'canvas'});
+    var chartqbar = echarts.init(document.getElementById('qbar'), 'white', {renderer: 'canvas'});
+    var chartcpie = echarts.init(document.getElementById('catpie'), 'white', {renderer: 'canvas'});
+    var chartword = echarts.init(document.getElementById('wordshow'), 'white', {renderer: 'canvas'});
+    var chartrelation = echarts.init(document.getElementById('arelation'), 'white', {renderer: 'canvas'});
+    $(
+        function () {
+            fetchDatabar(chartbar);
+            fetchData_line(chartline);
+            fetchData_obar(chartobar);
+            fetchData_pie(chartpie);
+            fetchData_qbar(chartqbar);
+            fetchData_cpie(chartcpie);
+            fetchData_word(chartword);
+            fetchData_rela(chartrelation);
+        }
+    );
+
+    function fetchDatabar() {
+        $.ajax({
+            type: "GET",
+            url: "http://127.0.0.1:8000/author_bar/",
+            dataType: 'json',
+            success: function (result) {
+                chartbar.setOption(result.data);
+            }
+        });
+    }
+
+    function fetchData_line() {
+        $.ajax({
+            type: "GET",
+            url: "http://127.0.0.1:8000/line/",
+            dataType: 'json',
+            success: function (result) {
+                chartline.setOption(result.data);
+            }
+        });
+    }
+
+    function fetchData_obar() {
+        $.ajax({
+            type: "GET",
+            url: "http://127.0.0.1:8000/orginize_bar/",
+            dataType: 'json',
+            success: function (result) {
+                chartobar.setOption(result.data);
+            }
+        });
+    }
+
+    function fetchData_pie() {
+        $.ajax({
+            type: "GET",
+            url: "http://127.0.0.1:8000/xpie/",
+            dataType: 'json',
+            success: function (result) {
+                chartpie.setOption(result.data);
+            }
+        });
+    }
+    function fetchData_qbar() {
+        $.ajax({
+            type: "GET",
+            url: "/qbar/",
+            dataType: 'json',
+            success: function (result) {
+                chartqbar.setOption(result.data);
+            }
+        });
+    }
+    function fetchData_cpie() {
+        $.ajax({
+            type: "GET",
+            url: "http://127.0.0.1:8000/catpie/",
+            dataType: 'json',
+            success: function (result) {
+                chartcpie.setOption(result.data);
+            }
+        });
+    }
+    function fetchData_word() {
+        $.ajax({
+            type: "GET",
+            url: "http://127.0.0.1:8000/word/",
+            dataType: 'json',
+            success: function (result) {
+                chartword.setOption(result.data);
+            }
+        });
+    }
+    function fetchData_rela() {
+        $.ajax({
+            type: "GET",
+            url: "http://127.0.0.1:8000/relation/",
+            dataType: 'json',
+            success: function (result) {
+                chartrelation.setOption(result.data);
+            }
+        });
+    }
+
+</script>
+</body>
+</html>

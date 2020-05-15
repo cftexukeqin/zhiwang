@@ -1,0 +1,14 @@
+body {
+    background-image: url(../img/bg1.jpg);
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+    font-family: 'Roboto', sans-serif;
+}
+
+.main-box{
+    margin: 50px auto;
+    width: 70%;
+    background: #ffffff;
+}

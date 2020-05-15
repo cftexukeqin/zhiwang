@@ -1,0 +1,82 @@
+body {
+    background-image: url(../img/bg1.jpg);
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+    font-family: 'Roboto', sans-serif;
+}
+
+.main-container {
+    width: 80%;
+    margin: 90px auto;
+    /*background: #2b542c;*/
+}
+
+.title {
+    margin-top: 100px;
+    text-align: center;
+    line-height: 30px;
+    color: honeydew;
+    font-family: 'Consolas', 'Monaco', 'Bitstream Vera Sans Mono', monospace;
+}
+
+.left-box{
+    width: 100px;
+    line-height: 34px;
+}
+select{
+    line-height: 34px;
+    width: 110px;
+    height: 34px;
+    border-radius: 5px;
+    /*background-color: #1da1f2;*/
+
+}
+.search-box {
+    margin-top: 100px;
+    margin-bottom: 30px;
+    margin-left: auto;
+    margin-right: auto;
+    /*background: #2b542c;*/
+    width: 70%;
+}
+.input-group input{
+    display: inline-block;
+}
+.search-span {
+    cursor: pointer;
+}
+
+.upper-btn {
+    cursor: pointer;
+}
+
+.tips {
+    width: 30%;
+    position: absolute;
+    bottom: 30px;
+    left: 520px;
+
+}
+
+.tips ul {
+    padding: 0;
+    list-style: none;
+    color: white;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+}
+
+.tips ul li {
+    cursor: pointer;
+}
+
+.search2{
+    margin: 20px auto;
+    text-align: center;
+}
+.search2 input{
+    width: 80px;
+}
