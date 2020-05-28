@@ -114,3 +114,17 @@ body {
     line-height: 100px;
     height: 100px;
 }
+.pagebox{
+    margin-top: 30px;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    width: 20%;
+}
+.pagegroup{
+    list-style: none;
+    display: flex;
+    color: white;
+    flex-wrap: wrap;
+    justify-content: space-around;
+}

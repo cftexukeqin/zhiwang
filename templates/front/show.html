@@ -54,7 +54,6 @@
         <li role="presentation"><a href="#qikan" aria-controls="qikan" role="tab" data-toggle="tab">柱形图-期刊</a></li>
         <li role="presentation"><a href="#catagory" aria-controls="qikan" role="tab" data-toggle="tab">饼图-资源类型</a></li>
         <li role="presentation"><a href="#word" aria-controls="word" role="tab" data-toggle="tab">柱状图-关键词</a></li>
-        <li role="presentation"><a href="#relation" aria-controls="relation" role="tab" data-toggle="tab">关系图-作者</a></li>
     </ul>
 
     <!-- Tab panes -->
@@ -80,14 +79,13 @@
         <div role="tabpanel" class="tab-pane" id="word">
             <div id="wordshow" style="width:1000px; height:600px;"></div>
         </div>
-        <div role="tabpanel" class="tab-pane" id="relation">
-            <div id="arelation" style="width:1000px; height:600px;"></div>
-        </div>
+
 
     </div>
 
 </div>
 <script>
+    // 初始化不同的图表类型
     var chartbar = echarts.init(document.getElementById('abar'), 'white', {renderer: 'canvas'});
     var chartline = echarts.init(document.getElementById('line'), 'white', {renderer: 'canvas'});
     var chartobar = echarts.init(document.getElementById('obar'), 'white', {renderer: 'canvas'});
@@ -95,9 +93,10 @@
     var chartqbar = echarts.init(document.getElementById('qbar'), 'white', {renderer: 'canvas'});
     var chartcpie = echarts.init(document.getElementById('catpie'), 'white', {renderer: 'canvas'});
     var chartword = echarts.init(document.getElementById('wordshow'), 'white', {renderer: 'canvas'});
-    var chartrelation = echarts.init(document.getElementById('arelation'), 'white', {renderer: 'canvas'});
+
     $(
         function () {
+            // 下面这几个都是函数执行
             fetchDatabar(chartbar);
             fetchData_line(chartline);
             fetchData_obar(chartobar);
@@ -105,16 +104,17 @@
             fetchData_qbar(chartqbar);
             fetchData_cpie(chartcpie);
             fetchData_word(chartword);
-            fetchData_rela(chartrelation);
+
         }
     );
-
+    // 数据请求函数
     function fetchDatabar() {
         $.ajax({
             type: "GET",
-            url: "http://127.0.0.1:8000/author_bar/",
+            url: "http://127.0.0.1:8000/author_bar/", // 请求相应的Url
             dataType: 'json',
             success: function (result) {
+                // 返回的Json数据设置到实例化的图表当中
                 chartbar.setOption(result.data);
             }
         });

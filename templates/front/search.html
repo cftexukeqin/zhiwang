@@ -64,7 +64,7 @@
     {% if documents %}
         <div class="search-box">
             <div class="item-group">
-                {% for document in documents %}
+                {% for document in documents.object_list %}
                     <div class="item">
                         <div class="article-title">
                             <h3>{{ document.title }}</h3>
@@ -93,9 +93,28 @@
         <h3>未查询到相关数据，请重新输入检索条件！</h3>
         </div>
     {% endif %}
-    {% if documents.count > 8 %}
-        分页
-    {% endif %}
+    <div class="pagebox">
+        <ul class="pagegroup">
+            {#                                分页判断#}
+            {% if documents.has_previous %}
+                <li class="long"><a href="?page={{ documents.previous_page_number }}"><<</a></li>
+            {% endif %}
+            {% for page in documents.pages %}
+                {% if page %}
+                    {% ifequal page courses.number %}
+                        {#                                            page.number是当前的页数#}
+                        {#                                            page.querystring  是字符串page=page.number#}
+                        <li class="active"><a href="?{{ page.querystring }}">{{ page }}</a></li>
+                    {% else %}
+                        <li class=""><a href="?{{ page.querystring }}">{{ page }}</a></li>
+                    {% endifequal %}
+                {% endif %}
+            {% endfor %}
+            {% if documents.has_next %}
+                <li class="long"><a href="?page={{ documents.next_page_number }}">>></a></li>
+            {% endif %}
+        </ul>
+    </div>
 
 </div>
 <div class="tips">
