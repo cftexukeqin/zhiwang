@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>首页-论文文献检索可视化系统</title>
     <link rel="stylesheet" href="{% static 'css/index.css' %}">
     <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" crossorigin="anonymous">
     <link rel="stylesheet" href="{% static 'js/sweetalert/sweetalert.css' %}" crossorigin="anonymous">
@@ -48,8 +48,10 @@
                         <li><a href="{% url 'auth:login' %}">请登录</a></li>
                     {% endif %}
                 <ul class="dropdown-menu">
-                    <li><a href="#">个人资料</a></li>
-                    <li><a href="#">设置</a></li>
+                    <li><a href="{% url 'auth:info' %}">个人资料</a></li>
+                    {% if request.user.is_staff %}
+                        <li><a href="/admin/login/">系统管理</a></li>
+                    {% endif %}
                     <li role="separator" class="divider"></li>
                     <li><a href="{% url 'auth:logout' %}">注销登录</a></li>
                 </ul>

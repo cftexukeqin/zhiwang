@@ -37,65 +37,77 @@ def search(request):
         if words:
             documents = Document.objects.filter(title__contains=words).all()
         else:
-            documents = Document.objects.all()[:20]
+            documents = Document.objects.all()
     elif search_cat_id == 'author':
         if words:
             documents = Document.objects.filter(author__contains=words).all()
         else:
-            documents = Document.objects.all()[:20]
+            documents = Document.objects.all()
     elif search_cat_id == 'source':
         if words:
             documents = Document.objects.filter(acticle_source__contains=words).all()
         else:
-            documents = Document.objects.all()[:20]
+            documents = Document.objects.all()
     elif search_cat_id == 'keywords':
         if words:
             documents = Document.objects.filter(key_words__contains=words).all()
         else:
-            documents = Document.objects.all()[:20]
+            documents = Document.objects.all()
     elif search_cat_id == 'summary':
         if words:
             documents = Document.objects.filter(summary__contains=words).all()
         else:
-            documents = Document.objects.all()[:20]
+            documents = Document.objects.all()
     else:
-        documents = Document.objects.all()[:20]
+        documents = Document.objects.all()
 
     # 搜索结果可视化核心代码
     author_list = []
     source_list = []
     year_list = []
     orginize_list = []
+    key_words = []
     for document in documents:
         author_list += hander_author(document.author)
         source_list.append(document.acticle_source.split(",")[0])
         year_list.append(get_year(document.acticle_source.split(",")[1]))
         orginize_list.append(document.author_location.split(",")[0])
-
+        key_words += handle_words(document.key_words)
     orginize_dict = Counter(orginize_list)
     author_dict = Counter(reversed(author_list))
     source_dict = Counter(source_list)
-    year_dict = Counter(year_list)
+    year_dict = Counter(reversed(year_list))
+    words_dict = Counter(key_words)
 
-    print(orginize_dict)
+    words_list = sorted(words_dict.items(),key=lambda item:item[1])
+    print(words_list)
+
+    new_year = sorted(year_dict.items(),key=lambda item: item[0])
+    new_year_name = []
+    new_year_nums = []
+    for item in new_year:
+        new_year_name.append(item[0])
+        new_year_nums.append(item[1])
+    # memcache 存储词云数据
+    handle_memcache.set_key("words",words_list)
 
     # memcached 存储作者信息
-    handle_memcache.set_key("author_name",list(author_dict.keys()))
-    handle_memcache.set_key("author_nums",list(author_dict.values()))
+    handle_memcache.set_key("author_name",list(author_dict.keys())[:20])
+    handle_memcache.set_key("author_nums",list(author_dict.values())[:20])
 
     # memcached 存储期刊信息
-    handle_memcache.set_key("qikan_name",list(source_dict.keys()))
-    handle_memcache.set_key("qikan_nums",list(source_dict.values()))
+    handle_memcache.set_key("qikan_name",list(source_dict.keys())[:20])
+    handle_memcache.set_key("qikan_nums",list(source_dict.values())[:20])
 
     # memcached 存储年份信息
-    handle_memcache.set_key("year_name",list(year_dict.keys()))
-    handle_memcache.set_key("year_nums",list(year_dict.values()))
+    handle_memcache.set_key("year_name",new_year_name)
+    handle_memcache.set_key("year_nums",new_year_nums)
 
     # memcached 存储机构信息
     handle_memcache.set_key("org_name",list(orginize_dict.keys()))
     handle_memcache.set_key("org_nums",list(orginize_dict.values()))
 
-    p = Paginator(documents, 5, request=request)
+    p = Paginator(documents, 10, request=request)
     s_documents = p.page(page)
     # 查询内容返回前端模板，前端可以通过{{ documents }} 的方式获取数据
     context = {
@@ -110,9 +122,11 @@ def get_year(value):
         return re.search("\d+",value).group()
     return ""
 
+def handle_words(value):
+    return value.split(",")
 
 def hander_author(value):
-    return value.split(",")
+    return [i.strip() for i in value.split(",")]
 
 def document_list(request):
     all_documents = Document.objects.all()
@@ -181,6 +195,7 @@ def year_line():
     x = handle_memcache.get_value("year_name")
     y = handle_memcache.get_value("year_nums")
 
+
     line2 = (
         Line()
             .set_global_opts(
@@ -223,7 +238,7 @@ def xueke_pie():
             center=["40%", "50%"],
         )
             .set_global_opts(
-            title_opts=opts.TitleOpts(title="各学科占比"),
+            title_opts=opts.TitleOpts(title="期刊占比"),
             legend_opts=opts.LegendOpts(type_="scroll", pos_left="80%", orient="vertical"),
         )
             .set_series_opts(label_opts=opts.LabelOpts(formatter="{b}: {c}"))
@@ -295,17 +310,15 @@ def cat_pie():
 
 
 def wordshow():
-    data1 = list(s_data.keywords.values())
-    data2 = list(s_data.keywords_nums.values())
-
+    words_list = handle_memcache.get_value('words')[::-1][1:50]
     c = (
-        Bar()
-            .add_xaxis(data1)
-            .add_yaxis("关键词", data2)
-            .set_series_opts(label_opts=opts.LabelOpts(position="top"))
+        WordCloud()
+            .add(series_name="热点分析", data_pair=words_list, word_size_range=[6, 66],shape="star")
             .set_global_opts(
-            title_opts=opts.TitleOpts(title="词频展示"),
-            xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=45)),
+            title_opts=opts.TitleOpts(
+                title="热点分析", title_textstyle_opts=opts.TextStyleOpts(font_size=23)
+            ),
+            tooltip_opts=opts.TooltipOpts(is_show=True),
         )
             .dump_options_with_quotes()
     )
@@ -444,6 +457,9 @@ def upper_search(request):
             elif searchtype1 == 'keywords' and searchtype2 == 'summary':
                 documents = Document.objects.filter(
                     Q(key_words__icontains=upper_words1) | Q(summary__icontains=upper_words2)).all()
+            elif searchtype1 == 'keywords' and searchtype2 == 'author':
+                documents = Document.objects.filter(
+                    Q(key_words__icontains=upper_words1) | Q(author__icontains=upper_words2)).all()
             elif searchtype1 == 'title' and searchtype2 == 'summary':
                 documents = Document.objects.filter(
                     Q(title__icontains=upper_words1) | Q(summary__icontains=upper_words2)).all()
@@ -456,34 +472,47 @@ def upper_search(request):
                     Q(author__icontains=upper_words1) | Q(author__icontains=upper_words2)).all()
             else:
                 documents = Document.objects.all()
-            # 搜索结果可视化核心代码
+        # 搜索结果可视化核心代码
+        # 搜索结果可视化核心代码
         author_list = []
         source_list = []
         year_list = []
         orginize_list = []
+        key_words = []
         for document in documents:
             author_list += hander_author(document.author)
             source_list.append(document.acticle_source.split(",")[0])
             year_list.append(get_year(document.acticle_source.split(",")[1]))
             orginize_list.append(document.author_location.split(",")[0])
-
+            key_words += handle_words(document.key_words)
         orginize_dict = Counter(orginize_list)
         author_dict = Counter(reversed(author_list))
         source_dict = Counter(source_list)
-        year_dict = Counter(year_list)
+        year_dict = Counter(reversed(year_list))
+        words_dict = Counter(key_words)
 
+        words_list = sorted(words_dict.items(), key=lambda item: item[1])
+
+        new_year = sorted(year_dict.items(), key=lambda item: item[0])
+        new_year_name = []
+        new_year_nums = []
+        for item in new_year:
+            new_year_name.append(item[0])
+            new_year_nums.append(item[1])
+        # memcache 存储词云数据
+        handle_memcache.set_key("words", words_list)
 
         # memcached 存储作者信息
-        handle_memcache.set_key("author_name", list(author_dict.keys()))
-        handle_memcache.set_key("author_nums", list(author_dict.values()))
+        handle_memcache.set_key("author_name", list(author_dict.keys())[:20])
+        handle_memcache.set_key("author_nums", list(author_dict.values())[:20])
 
         # memcached 存储期刊信息
-        handle_memcache.set_key("qikan_name", list(source_dict.keys()))
-        handle_memcache.set_key("qikan_nums", list(source_dict.values()))
+        handle_memcache.set_key("qikan_name", list(source_dict.keys())[:20])
+        handle_memcache.set_key("qikan_nums", list(source_dict.values())[:20])
 
         # memcached 存储年份信息
-        handle_memcache.set_key("year_name", list(year_dict.keys()))
-        handle_memcache.set_key("year_nums", list(year_dict.values()))
+        handle_memcache.set_key("year_name", new_year_name)
+        handle_memcache.set_key("year_nums", new_year_nums)
 
         # memcached 存储机构信息
         handle_memcache.set_key("org_name", list(orginize_dict.keys()))
@@ -504,29 +533,42 @@ def upper_search(request):
         source_list = []
         year_list = []
         orginize_list = []
+        key_words = []
         for document in documents:
             author_list += hander_author(document.author)
             source_list.append(document.acticle_source.split(",")[0])
             year_list.append(get_year(document.acticle_source.split(",")[1]))
             orginize_list.append(document.author_location.split(",")[0])
-
+            key_words += handle_words(document.key_words)
         orginize_dict = Counter(orginize_list)
         author_dict = Counter(reversed(author_list))
         source_dict = Counter(source_list)
-        year_dict = Counter(year_list)
+        year_dict = Counter(reversed(year_list))
+        words_dict = Counter(key_words)
 
+        words_list = sorted(words_dict.items(), key=lambda item: item[1])
+        print(words_list)
+
+        new_year = sorted(year_dict.items(), key=lambda item: item[0])
+        new_year_name = []
+        new_year_nums = []
+        for item in new_year:
+            new_year_name.append(item[0])
+            new_year_nums.append(item[1])
+        # memcache 存储词云数据
+        handle_memcache.set_key("words", words_list)
 
         # memcached 存储作者信息
-        handle_memcache.set_key("author_name", list(author_dict.keys()))
-        handle_memcache.set_key("author_nums", list(author_dict.values()))
+        handle_memcache.set_key("author_name", list(author_dict.keys())[:20])
+        handle_memcache.set_key("author_nums", list(author_dict.values())[:20])
 
         # memcached 存储期刊信息
-        handle_memcache.set_key("qikan_name", list(source_dict.keys()))
-        handle_memcache.set_key("qikan_nums", list(source_dict.values()))
+        handle_memcache.set_key("qikan_name", list(source_dict.keys())[:20])
+        handle_memcache.set_key("qikan_nums", list(source_dict.values())[:20])
 
         # memcached 存储年份信息
-        handle_memcache.set_key("year_name", list(year_dict.keys()))
-        handle_memcache.set_key("year_nums", list(year_dict.values()))
+        handle_memcache.set_key("year_name", new_year_name)
+        handle_memcache.set_key("year_nums", new_year_nums)
 
         # memcached 存储机构信息
         handle_memcache.set_key("org_name", list(orginize_dict.keys()))

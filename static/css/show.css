@@ -9,6 +9,10 @@ body {
 
 .main-box{
     margin: 50px auto;
-    width: 70%;
+    width: 60%;
     background: #ffffff;
+}
+.main-box ul{
+    display: flex;
+    justify-content: space-between;
 }

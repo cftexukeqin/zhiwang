@@ -1,10 +1,12 @@
 from django.shortcuts import render,redirect,reverse
 from django.contrib.auth import login,logout,authenticate
-from .forms import LoginForm,SignupForm
+from .forms import LoginForm,SignupForm,UploadImageForm, ModifyPwdForm, UserInfoForm
+from django.contrib.auth.hashers import make_password
+from django.views.generic import View
 
 from .models import UserProfile
 from apps.utils import restful
-
+from apps.utils.mixin_utils import LoginRequiredMixin
 # Create your views here.
 
 def my_login(request):
@@ -53,3 +55,59 @@ def regist(request):
 def my_logout(request):
     logout(request)
     return redirect(reverse('auth:login'))
+
+
+
+
+class ModifyPwdView(View):
+    '''修改用户密码'''
+
+    def post(self, request):
+        modify_form = ModifyPwdForm(request.POST)
+        if modify_form.is_valid():
+            pwd1 = request.POST.get("password1", "")
+            pwd2 = request.POST.get("password2", "")
+            email = request.POST.get("email", "")
+            if pwd1 != pwd2:
+                return restful.paramserror(message="两次密码不一致")
+            user = UserProfile.objects.get(email=email)
+            user.password = make_password(pwd2)
+            user.save()
+
+            return restful.ok()
+        else:
+            email = request.POST.get("email", "")
+            return restful.paramserror(message="密码不正确！")
+
+
+class UserinfoView(LoginRequiredMixin, View):
+    """
+    用户个人信息
+    """
+
+    def get(self, request):
+        return render(request, 'auth/usercenter.html')
+
+    def post(self, request):
+        user_info_form = UserInfoForm(request.POST, instance=request.user)
+        print(user_info_form)
+        if user_info_form.is_valid():
+            user_info_form.save()
+            return restful.ok()
+        else:
+            return restful.paramserror(message="参数错误")
+
+
+class UploadImageView(LoginRequiredMixin, View):
+    '''用户图像修改'''
+
+    def post(self, request):
+        # 上传的文件都在request.FILES里面获取，所以这里要多传一个这个参数
+        image_form = UploadImageForm(request.POST, request.FILES)
+        if image_form.is_valid():
+            image = image_form.cleaned_data['image']
+            request.user.image = image
+            request.user.save()
+            return restful.ok()
+        else:
+            return restful.paramserror(message="参数错误")

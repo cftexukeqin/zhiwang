@@ -1,0 +1,241 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <title>{% block title %}
+        个人信息
+    {% endblock %}</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/users/reset.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/users/animate.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/users/style.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/users/cityLayout.css' %}">
+    {% block custom_css %}
+
+    {% endblock %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/users/lq.datetimepick.css' %}"/>
+    <script src="{% static 'js/users/third/jquery.min.js' %}" type="text/javascript"></script>
+    <script src="{% static 'js/users/third/jquery-migrate-1.2.1.min.js' %}" type="text/javascript"></script>
+
+</head>
+<body>
+<section class="headerwrap headerwrap2">
+    <header>
+        <div class="header2 header">
+            <div class="top">
+                <div class="wp">
+                    <div class="fl"><a style="color: black;font-size: 18px;" href="/"><b>首页</b></a>
+                    </div>
+                    <!--登录后跳转-->
+                    {% if request.user.is_authenticated %}
+                        <div class="personal">
+                        <dl class="user fr">
+                            <dd>{{ user.username }}<img class="down fr" src="{% static 'images/top_down.png' %}"/></dd>
+                            <dt><img width="20" height="20" src="/media/{{ request.user.image }}"/></dt>
+                        </dl>
+                        <div class="userdetail">
+                        <dl>
+                            <dt><img width="80" height="80" src="/media/{{ request.user.image }}"/></dt>
+                            <dd>
+                                <h2>{{ request.user.nick_name }}</h2>
+                                <p>{{ request.user.username }}</p>
+                            </dd>
+                        </dl>
+                        <div class="btn">
+                        <a class="personcenter fl" href="{% url 'auth:info' %}">进入个人中心</a>
+                        <a class="fr" href="{% url 'auth:logout' %}">退出</a>
+                    {% else %}
+                        <a style="color:white" class="fr registerbtn" href="{% url 'auth:regist' %}">注册</a>
+                        <a style="color:white" class="fr loginbtn" href="{% url 'auth:login' %}">登录</a>
+                    {% endif %}
+                    </div>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+</section>
+<!--crumbs start-->
+{% block custom_bread %}
+{% endblock %}
+
+<section>
+    <div class="wp list personal_list">
+        <div class="left">
+            <ul>
+                <li {% ifequal  '/users/info/' request.path %}
+                    class="active2"
+                {% endifequal %}><a href="">个人资料</a></li>
+            </ul>
+        </div>
+
+        {% block custom_right_content %}
+        {% endblock %}
+    </div>
+</section>
+<!--sidebar start-->
+<section>
+    <ul class="sidebar">
+
+        <li class="totop"></li>
+    </ul>
+</section>
+<!--sidebar end-->
+<!--header start-->
+
+<div class="dialog" id="jsDialog">
+    <div class="successbox dialogbox" id="jsSuccessTips">
+        <h1>成功提交</h1>
+        <div class="close jsCloseDialog"><img src="{% static 'images/dig_close.png' %}"/></div>
+        <div class="cont">
+            <h2>您的需求提交成功！</h2>
+            <p></p>
+        </div>
+    </div>
+    <!--提示弹出框-->
+    <div class="bidtips dialogbox promptbox" id="jsComfirmDialig">
+        <h1>确认提交</h1>
+        <div class="close jsCloseDialog"><img src="{% static 'images/dig_close.png' %}"/></div>
+        <div class="cont">
+            <h2>您确认提交吗？</h2>
+            <dd class="autoTxtCount">
+                <div class="button">
+                    <input type="button" class="fl half-btn" value="确定" id="jsComfirmBtn"/>
+                    <span class="fr half-btn jsCloseDialog">取消</span>
+                </div>
+            </dd>
+        </div>
+    </div>
+    <div class="resetpwdbox dialogbox" id="jsResetDialog">
+        <h1>修改密码</h1>
+        <div class="close jsCloseDialog"><img src="{% static 'images/dig_close.png' %}"/></div>
+        <div class="cont">
+            <form id="jsResetPwdForm" autocomplete="off">
+                <div class="box">
+                    <span class="word2">新&nbsp;&nbsp;密&nbsp;&nbsp;码</span>
+                    <input type="password" id="pwd" name="password1" placeholder="6-20位非中文字符"/>
+                </div>
+                <div class="box">
+                    <span class="word2">确定密码</span>
+                    <input type="password" id="repwd" name="password2" placeholder="6-20位非中文字符"/>
+                </div>
+                <input style="display: none;" type="password" id="email" name="email" value="{{ request.user.email }}" placeholder="6-20位非中文字符"/>
+                <div class="error btns" id="jsResetPwdTips"></div>
+                <div class="button">
+                    <input id="jsResetPwdBtn" type="button" value="提交"/>
+                </div>
+                {% csrf_token %}
+            </form>
+        </div>
+    </div>
+</div>
+<div class="bg" id="dialogBg"></div>
+<footer>
+    <div class="footer">
+        {#        <p class="line"></p>#}
+        <div class="wp clear">
+{#            <span class="fl">Version: 2.0</span>#}
+{#            <span class="fr">copyright: bc_zhang 2019</span>#}
+        </div>
+    </div>
+</footer>
+
+<section>
+    <ul class="sidebar">
+        <li class="totop"></li>
+    </ul>
+</section>
+
+
+
+<script src="{% static 'js/users/third/selectUi.js' %}" type='text/javascript'></script>
+<script type="text/javascript" src="{% static 'js/users/third/plugins/laydate/laydate.js' %}"></script>
+<script src="{% static 'js/users/third/plugins/layer/layer.js' %}"></script>
+<script src="{% static 'js/users/third/plugins/queryCity/js/public.js' %}" type="text/javascript"></script>
+<script src="{% static 'js/users/third/unslider.js' %}" type="text/javascript"></script>
+<script src="{% static 'js/users/third/plugins/jquery.scrollLoading.js' %}" type="text/javascript"></script>
+<script src="{% static 'js/users/third/validateDialog.js' %}" type="text/javascript"></script>
+<script src="{% static 'js/users/third/deco-common.js' %}" type="text/javascript"></script>
+
+<script src="{% static 'js/users/third/plugins/jquery.upload.js' %}" type='text/javascript'></script>
+<script src="{% static 'js/users/third/validate.js' %}" type="text/javascript"></script>
+<script src="{% static 'js/users/third/deco-user.js' %}"></script>
+{% block custom_js %}
+    <script src="{% static 'js/message.js' %}"></script>
+{% endblock %}
+
+<script type="text/javascript">
+</script>
+
+<script>
+    var shareUrl = '',
+        shareText = '',
+        shareDesc = '',
+        shareComment = '';
+    $(function () {
+        $(".bdsharebuttonbox a").mouseover(function () {
+            var type = $(this).attr('data-cmd'),
+                $parent = $(this).parent('.bdsharebuttonbox'),
+                fxurl = $parent.attr('data-url'),
+                fxtext = $parent.attr('data-text'),
+                fxdesc = $parent.attr('data-desc'),
+                fxcomment = $parent.attr('data-comment');
+            switch (type) {
+                case 'tsina':
+                case 'tqq':
+                case 'renren':
+                    shareUrl = fxurl;
+                    shareText = fxdesc;
+                    shareDesc = '';
+                    shareComment = '';
+                    break;
+                default :
+                    shareUrl = fxurl;
+                    shareText = fxtext;
+                    shareDesc = fxdesc;
+                    shareComment = fxcomment;
+                    break;
+            }
+        });
+    });
+
+    function SetShareUrl(cmd, config) {
+        if (shareUrl) {
+            config.bdUrl = "" + shareUrl;
+        }
+        if (shareText) {
+            config.bdText = shareText;
+        }
+        if (shareDesc) {
+            config.bdDesc = shareDesc;
+        }
+        if (shareComment) {
+            config.bdComment = shareComment;
+        }
+
+        return config;
+    }
+
+    window._bd_share_config = {
+        "common": {
+            "onBeforeClick": SetShareUrl,
+            "bdPic": "",
+            "bdMini": "2",
+            "searchPic": "1",
+            "bdMiniList": false
+        },
+        "share": {
+            "bdSize": "16"
+        }
+    };
+    with (document) 0[(getElementsByTagName('head')[0] || body).appendChild(createElement('script')).src = 'http://bdimg.share.baidu.com../api/js/share.js?v=89860593.js?cdnversion=' + ~(-new Date() / 36e5)];
+</script>
+
+</body>
+</html>
+

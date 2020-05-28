@@ -42,3 +42,22 @@ class SignupForm(forms.Form,FormMixin):
         # if not img_captcha_mem or img_captcha!= img_captcha_mem:
         #     raise forms.ValidationError('图形验证码错误')
         return cleaned_data
+
+
+class ModifyPwdForm(forms.Form):
+    '''重置密码'''
+    password1 = forms.CharField(required=True, min_length=5)
+    password2 = forms.CharField(required=True, min_length=5)
+
+
+class UploadImageForm(forms.ModelForm):
+    '''用户更改图像'''
+    class Meta:
+        model = User
+        fields = ['image']
+
+class UserInfoForm(forms.ModelForm):
+    '''个人中心信息修改'''
+    class Meta:
+        model = User
+        fields = ['birthday','email','nick_name','mobile','gender']
