@@ -12,7 +12,7 @@ django.setup()
 from apps.front.models import Document
 
 
-df = pd.read_excel('data/test_data.xls',index_col='序号')
+df = pd.read_excel('data/new_data.xls',index_col='序号')
 
 
 
